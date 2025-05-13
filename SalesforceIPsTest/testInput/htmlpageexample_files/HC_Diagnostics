@@ -1,0 +1,63 @@
+'use strict';
+
+//H&T Community Diagnostics Script
+
+let path = window;
+let isSetUp = false;
+
+/**
+ * listener for 'setConfigNS' event
+ * It initialises a namespace to keep diagnostic data from LWCs
+ */
+window.addEventListener('setConfigNS', function(event) {
+    if (!event || !event.detail || !event.detail.configNS) {
+        return;
+    }
+    try {
+        let configNS = event.detail.configNS.split('.');
+
+        configNS.forEach(property => {
+            path[property.trim()] = {};
+            path = path[property.trim()];
+        });
+        isSetUp = true;
+        setTimeout(window.diagnoseLWC, 10000);
+    } catch(e) {
+        //
+    }
+});
+
+/**
+ * listener for 'pushDiagnosticData' event
+ * It populates the namespace with the data from LWCs
+ */
+window.addEventListener('pushDiagnosticData', function(event) {
+    if (!isSetUp || !event || !event.detail) {
+        return;
+    }
+    try {
+        event.detail.forEach(diagnosticData => {
+            path[diagnosticData.name] = diagnosticData.value;
+        });
+    } catch(e) {
+        //
+    }
+});
+
+/**
+ * Requests diagnostics data from LWCs
+ */
+function diagnoseLWC() {
+    if (isSetUp) {
+        let requestDiagnosticDataEvent = new CustomEvent('sendDiagnosticData');
+        window.dispatchEvent(requestDiagnosticDataEvent);
+    }
+}
+
+/**
+ * listener for 'load' event
+ * requests diagnostics data from LWCs once the page is loaded
+ */
+window.addEventListener('load', function(event) {
+    window.diagnoseLWC();
+});

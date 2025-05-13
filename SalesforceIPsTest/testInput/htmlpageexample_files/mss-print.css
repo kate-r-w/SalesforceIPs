@@ -1,0 +1,22 @@
+@media print {
+    .globalnav-wrapper,
+    .ht-footer {
+        display: none !important;
+    }
+
+    li,
+    .card {
+        break-inside: avoid;
+    }
+
+    .mss-category-overview-list-container,
+    .mss-capability-table-container {
+        overflow: visible !important;
+        max-height: none !important;
+    }
+
+    .card-compact_dimensions,
+    .card-compact_divider_width {
+        max-width: 100% !important;
+    }
+}
