@@ -10,5 +10,12 @@ namespace SalesforceIPsTest
             var something = await PageScraper.GetIps();
             Assert.NotNull(something);
         }
+
+        [Fact]
+        public async void Has137Ips()
+        {
+            var something = await PageScraper.GetIps();
+            Assert.Equal(137, something.Count);
+        }
     }
 }
