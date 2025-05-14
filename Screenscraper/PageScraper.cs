@@ -39,7 +39,8 @@ namespace Scraper
 
         private static IList<IpResult> GetFromByoTable(HtmlDocument htmlDoc)
         {
-            return GetFromTable(htmlDoc, IpType.BYOLLM, "(//table)[4]", ".//td[3]", false);
+            //todo: add SF region
+            return GetFromTable(htmlDoc, IpType.BYOLLM, "(//table)[4]", ".//td[position()>1]", true);
         }
 
         private static IList<IpResult> GetFromMyTrailheadTable(HtmlDocument htmlDoc)
@@ -49,9 +50,7 @@ namespace Scraper
 
         private static IList<IpResult> GetIpsAndBlocksFromSecondTable(HtmlDocument htmlDoc)
         {
-            var tableSelector = "(//table)[2]";
-            //todo: get region from td instead of fixed
-            return GetFromTable(htmlDoc, IpType.NonHyperforce, tableSelector, ".//td", false, "USA");
+            return GetFromTable(htmlDoc, IpType.NonHyperforce, "(//table)[2]", ".//td", true);
         }
 
         private static IList<IpResult> GetBlocksFromFirstTable(HtmlDocument htmlDoc)
@@ -59,7 +58,7 @@ namespace Scraper
             return GetFromTable(htmlDoc, IpType.NonHyperforce, "(//table)[1]", ".//td[1]", true);
         }
 
-        private static IList<IpResult> GetFromTable(HtmlDocument htmlDoc, IpType ipType, string tableSelector, string dataSelector, bool regionFromHeader, string? fixedRegion = null)
+        private static IList<IpResult> GetFromTable(HtmlDocument htmlDoc, IpType ipType, string tableSelector, string dataSelector, bool regionFrpmNonIpCell, string? fixedRegion = null)
         {
             // Extract IP blocks from the first column of the first table
             var table = htmlDoc.DocumentNode.SelectSingleNode(tableSelector);
@@ -77,11 +76,11 @@ namespace Scraper
                 {
                     foreach (var column in columns)
                     {
-                        var ipText = column.InnerHtml.Trim();
-                        var ips = GetValidIpsAndBlocks(ipText);
-                        if (ips.Count == 0)
+                        var ipText = column.InnerText.Trim();
+                        var ips = GetValidIpsAndBlocks(column.InnerHtml);
+                        if (ips.Count == 0 && !string.IsNullOrEmpty(ipText))
                         {
-                            if (regionFromHeader)
+                            if (regionFrpmNonIpCell)
                             {
                                 //assume region name
                                 region = ipText;
